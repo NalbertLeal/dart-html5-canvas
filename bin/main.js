@@ -2700,7 +2700,7 @@
       return new P.UnimplementedError(message);
     },
     print: function(object) {
-      H.printString(object);
+      H.printString(J.toString$0$(object));
     },
     Error: function Error() {
     },
@@ -2819,14 +2819,21 @@
     Window: function Window() {
     }
   },
-  B = {Dot: function Dot(t0, t1, t2, t3, t4) {
+  B = {AxisIncDec: function AxisIncDec(t0) {
+      this._dot$_name = t0;
+    }, Dot: function Dot(t0, t1, t2, t3, t4, t5, t6) {
       var _ = this;
       _.canvasElement = t0;
       _.canvasContext = t1;
-      _.scaleProjected = _.yProjected = _.xProjected = _.radius = _.z = _.y = _.x = null;
-      _.perspective = t2;
-      _.projection_center_x = t3;
-      _.projection_center_y = t4;
+      _.z = _.y = _.x = 0;
+      _.theta = null;
+      _.thetaStatus = t2;
+      _.phi = null;
+      _.globeRadius = t3;
+      _.scaleProjected = _.yProjected = _.xProjected = null;
+      _.perspective = t4;
+      _.projection_center_x = t5;
+      _.projection_center_y = t6;
     }},
   O = {
     ParticlesSphere$: function(canvasHtmlId) {
@@ -3398,16 +3405,20 @@
       return Math.random();
     }
   };
+  B.AxisIncDec.prototype = {
+    toString$0: function(_) {
+      return this._dot$_name;
+    }
+  };
   B.Dot.prototype = {};
   O.ParticlesSphere.prototype = {
     ParticlesSphere$1: function(canvasHtmlId) {
-      var t2, i, t3, t4, t5, _this = this,
+      var t2, i, t3, t4, t5, t6, t7, _this = this,
         t1 = type$.legacy_CanvasElement._as(document.getElementById("scene"));
       _this.canvasElement = t1;
       _this.canvasContext = type$.legacy_CanvasRenderingContext2D._as((t1 && C.CanvasElement_methods).getContext$1(t1, "2d"));
       C.Window_methods._addEventListener$3(window, "resize", type$.nullable_dynamic_Function_Event._as(new O.ParticlesSphere_closure(_this)), null);
       _this.onResize$0(0);
-      P.print(H.S(_this.canvasElement.width) + " " + H.S(_this.canvasElement.height));
       t1 = _this.canvasElement;
       t2 = t1.width;
       if (typeof t2 !== "number")
@@ -3423,25 +3434,18 @@
       _this.projection_center_y = t1 / 2;
       for (t1 = _this.dots, i = 0; i < 800; ++i) {
         t2 = _this.canvasElement;
-        t3 = new B.Dot(t2, _this.canvasContext, _this.perspective, _this.projection_center_x, _this.projection_center_y);
-        t4 = C.C__JSRandom.nextDouble$0();
-        t5 = t2.width;
-        if (typeof t5 !== "number")
-          return H.iae(t5);
-        t3.x = (t4 - 0.5) * t5;
-        t5 = C.C__JSRandom.nextDouble$0();
-        t4 = t2.height;
-        if (typeof t4 !== "number")
-          return H.iae(t4);
-        t3.y = (t5 - 0.5) * t4;
-        t4 = C.C__JSRandom.nextDouble$0();
-        t2 = t2.width;
-        if (typeof t2 !== "number")
-          return H.iae(t2);
-        t3.z = t4 * t2;
-        t3.radius = 10;
-        t3.scaleProjected = t3.yProjected = t3.xProjected = 0;
-        C.JSArray_methods.add$1(t1, t3);
+        t3 = _this.canvasContext;
+        t4 = _this.perspective;
+        t5 = _this.projection_center_x;
+        t6 = _this.projection_center_y;
+        t7 = t2.width;
+        if (typeof t7 !== "number")
+          return t7.$div();
+        t6 = new B.Dot(t2, t3, C.AxisIncDec_2, t7 / 3, t4, t5, t6);
+        t6.theta = C.C__JSRandom.nextDouble$0() * 2 * 3.141592653589793;
+        t6.phi = Math.acos(C.C__JSRandom.nextDouble$0() * 2 - 1);
+        t6.scaleProjected = t6.yProjected = t6.xProjected = 0;
+        C.JSArray_methods.add$1(t1, t6);
       }
       _this.render$1(0);
     },
@@ -3468,40 +3472,55 @@
         (t1 && C.CanvasElement_methods).set$height(t1, height);
       }
     },
-    render$1: function(_) {
-      var i, t3, t4, t5, t6, _this = this,
-        t1 = _this.canvasContext,
-        t2 = _this.canvasElement;
+    render$1: function(frame) {
+      var t1, t2, i, t3, t4, t5, t6, t7, _this = this;
+      H._asNumS(frame);
+      t1 = _this.canvasContext;
+      t2 = _this.canvasElement;
       t1.clearRect(0, 0, t2.width, t2.height);
-      for (t1 = _this.dots, i = 0; i < 800; ++i) {
+      for (t1 = _this.dots, t2 = J.getInterceptor$(frame), i = 0; i < 800; ++i) {
         if (i >= t1.length)
           return H.ioore(t1, i);
-        t2 = t1[i];
-        t3 = t2.perspective;
-        t4 = t2.z;
-        if (typeof t3 !== "number")
-          return t3.$add();
-        t3 = t2.scaleProjected = t3 / (t3 + t4);
-        t5 = t2.x;
-        t6 = t2.projection_center_x;
+        t3 = t1[i];
+        H.printString(t2.toString$0(frame));
+        t4 = t3.thetaStatus;
+        t5 = t4 === C.AxisIncDec_0;
+        if (t5)
+          ++t3.theta;
+        else if (t4 === C.AxisIncDec_1)
+          --t3.theta;
+        t6 = t3.theta;
+        if (t6 >= 6.283185307179586 && t5)
+          t4 = t3.thetaStatus = C.AxisIncDec_1;
+        if (t6 <= 0 && t4 === C.AxisIncDec_1)
+          t3.thetaStatus = C.AxisIncDec_0;
+        t4 = t3.globeRadius;
+        t3.x = t4 * Math.sin(t3.phi) * Math.cos(t3.theta);
+        t3.y = t4 * Math.cos(t3.phi);
+        t4 = t3.z = t4 * Math.sin(t3.phi) * Math.sin(t3.theta) + t4;
+        t3.thetaStatus = t3.thetaStatus === C.AxisIncDec_2 && t3.theta >= 3.141592653589793 ? C.AxisIncDec_1 : C.AxisIncDec_0;
+        t5 = t3.perspective;
+        if (typeof t5 !== "number")
+          return t5.$add();
+        t5 = t3.scaleProjected = t5 / (t5 + t4);
+        t6 = t3.x;
+        t7 = t3.projection_center_x;
+        if (typeof t7 !== "number")
+          return H.iae(t7);
+        t3.xProjected = t6 * t5 + t7;
+        t7 = t3.y;
+        t6 = t3.projection_center_y;
         if (typeof t6 !== "number")
           return H.iae(t6);
-        t2.xProjected = t5 * t3 + t6;
-        t6 = t2.y;
-        t5 = t2.projection_center_y;
+        t3.yProjected = t7 * t5 + t6;
+        t6 = t3.canvasContext;
+        t5 = t3.canvasElement.width;
         if (typeof t5 !== "number")
           return H.iae(t5);
-        t2.yProjected = t6 * t3 + t5;
-        t5 = t2.canvasContext;
-        t3 = t2.canvasElement.width;
-        if (typeof t3 !== "number")
-          return H.iae(t3);
-        t5.globalAlpha = Math.abs(1 - t4 / t3);
-        t3 = t2.xProjected;
-        t4 = t2.radius;
-        t6 = t2.yProjected;
-        t2 = t4 * 2 * t2.scaleProjected;
-        t5.fillRect(t3 - t4, t6 - t4, t2, t2);
+        t6.globalAlpha = Math.abs(1 - t4 / t5);
+        t6.beginPath();
+        t6.arc(t3.xProjected, t3.yProjected, 10 * t3.scaleProjected, 0, 6.283185307179586, false);
+        t6.fill();
       }
       t1 = window;
       t2 = type$.void_Function_num._as(_this.get$render());
@@ -3538,7 +3557,7 @@
     var _inherit = hunkHelpers.inherit,
       _inheritMany = hunkHelpers.inheritMany;
     _inherit(P.Object, null);
-    _inheritMany(P.Object, [H.JS_CONST, J.Interceptor, J.ArrayIterator, H.TypeErrorDecoder, P.Error, H.NullThrownFromJavaScriptException, H._StackTrace, H.Closure, H.Rti, H._FunctionParameters, P._TimerImpl, P._AsyncCallbackEntry, P._Zone, P.StackOverflowError, P._Exception, P.Null, P.StringBuffer, P._JSRandom, B.Dot, O.ParticlesSphere]);
+    _inheritMany(P.Object, [H.JS_CONST, J.Interceptor, J.ArrayIterator, H.TypeErrorDecoder, P.Error, H.NullThrownFromJavaScriptException, H._StackTrace, H.Closure, H.Rti, H._FunctionParameters, P._TimerImpl, P._AsyncCallbackEntry, P._Zone, P.StackOverflowError, P._Exception, P.Null, P.StringBuffer, P._JSRandom, B.AxisIncDec, B.Dot, O.ParticlesSphere]);
     _inheritMany(J.Interceptor, [J.JSBool, J.JSNull, J.JavaScriptObject, J.JSArray, J.JSNumber, J.JSString, W.EventTarget, W.CanvasRenderingContext2D, W.DomException, W.Event]);
     _inheritMany(J.JavaScriptObject, [J.PlainJavaScriptObject, J.UnknownJavaScriptObject, J.JavaScriptFunction]);
     _inherit(J.JSUnmodifiableArray, J.JSArray);
@@ -3561,7 +3580,7 @@
     mangledNames: {},
     getTypeFromName: getGlobalFromName,
     metadata: [],
-    types: ["Null()", "~(~())", "~()", "@(@)", "@(@,String)", "@(String)", "Null(@)", "Null(~())", "~(@)", "~(Event*)"],
+    types: ["Null()", "~(~())", "~()", "@(@)", "@(@,String)", "@(String)", "Null(@)", "Null(~())", "~(num*)", "~(Event*)"],
     interceptorsByTag: null,
     leafTags: null,
     arrayRti: typeof Symbol == "function" && typeof Symbol() == "symbol" ? Symbol("$ti") : "$ti"
@@ -3611,6 +3630,9 @@
     C.PlainJavaScriptObject_methods = J.PlainJavaScriptObject.prototype;
     C.UnknownJavaScriptObject_methods = J.UnknownJavaScriptObject.prototype;
     C.Window_methods = W.Window.prototype;
+    C.AxisIncDec_0 = new B.AxisIncDec("AxisIncDec.INCREASING");
+    C.AxisIncDec_1 = new B.AxisIncDec("AxisIncDec.DECREASING");
+    C.AxisIncDec_2 = new B.AxisIncDec("AxisIncDec.NONE");
     C.C_JS_CONST = function getTagFallback(o) {
   var s = Object.prototype.toString.call(o);
   return s.substring(8, s.length - 1);

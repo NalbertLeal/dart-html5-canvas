@@ -35,6 +35,7 @@ class ParticlesSphere {
           perspective,
           projection_center_x,
           projection_center_y,
+          canvasElement.width/3,
         ),
       );
     }
@@ -56,7 +57,7 @@ class ParticlesSphere {
     }
   }
 
-  void render(_) {
+  void render(num frame) {
     canvasContext.clearRect(
       0,
       0,
@@ -65,7 +66,7 @@ class ParticlesSphere {
     );
 
     for(var i=0; i < 800; i++) {
-      dots[i].draw();
+      dots[i].draw(frame);
     }
 
     window.requestAnimationFrame(render);
