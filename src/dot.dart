@@ -28,6 +28,8 @@ class Dot {
   double perspective;
   double projection_center_x;
   double projection_center_y;
+  int counterFrames = 0;
+  int framesSpinInterval = 2;
 
   Dot(
     this.canvasElement,
@@ -64,6 +66,8 @@ class Dot {
   void draw(num frame) {
     animateTheta(frame);
     projectDot();
+    counterFrames = counterFrames == framesSpinInterval ? 0 : counterFrames+1;
+    
     canvasContext.globalAlpha = (1 - z / canvasElement.width).abs();
 
     canvasContext.beginPath();
@@ -73,10 +77,14 @@ class Dot {
   }
 
   void animateTheta(num frame) {
+    if (counterFrames != framesSpinInterval) {
+      return;
+    }
+
     if (thetaStatus == AxisIncDec.INCREASING) {
-      theta += 1;
+      theta += .01;
     } else if (thetaStatus == AxisIncDec.DECREASING) {
-      theta -= 1;
+      theta -= .01;
     }
 
     if (theta >= 2*pi && thetaStatus == AxisIncDec.INCREASING) {

@@ -2699,9 +2699,6 @@
     UnimplementedError$: function(message) {
       return new P.UnimplementedError(message);
     },
-    print: function(object) {
-      H.printString(J.toString$0$(object));
-    },
     Error: function Error() {
     },
     AssertionError: function AssertionError(t0) {
@@ -2834,6 +2831,7 @@
       _.perspective = t4;
       _.projection_center_x = t5;
       _.projection_center_y = t6;
+      _.counterFrames = 0;
     }},
   O = {
     ParticlesSphere$: function(canvasHtmlId) {
@@ -2852,7 +2850,7 @@
   },
   F = {
     main: function($arguments) {
-      P.print("Hello world!");
+      H.printString("Hello world!");
       O.ParticlesSphere$("scene");
     }
   };
@@ -3410,7 +3408,24 @@
       return this._dot$_name;
     }
   };
-  B.Dot.prototype = {};
+  B.Dot.prototype = {
+    animateTheta$1: function(frame) {
+      var t1, t2, t3, _this = this;
+      if (_this.counterFrames !== 2)
+        return;
+      t1 = _this.thetaStatus;
+      t2 = t1 === C.AxisIncDec_0;
+      if (t2)
+        _this.theta += 0.01;
+      else if (t1 === C.AxisIncDec_1)
+        _this.theta -= 0.01;
+      t3 = _this.theta;
+      if (t3 >= 6.283185307179586 && t2)
+        t1 = _this.thetaStatus = C.AxisIncDec_1;
+      if (t3 <= 0 && t1 === C.AxisIncDec_1)
+        _this.thetaStatus = C.AxisIncDec_0;
+    }
+  };
   O.ParticlesSphere.prototype = {
     ParticlesSphere$1: function(canvasHtmlId) {
       var t2, i, t3, t4, t5, t6, t7, _this = this,
@@ -3473,54 +3488,45 @@
       }
     },
     render$1: function(frame) {
-      var t1, t2, i, t3, t4, t5, t6, t7, _this = this;
+      var t1, t2, i, t3, t4, t5, t6, _this = this;
       H._asNumS(frame);
       t1 = _this.canvasContext;
       t2 = _this.canvasElement;
       t1.clearRect(0, 0, t2.width, t2.height);
-      for (t1 = _this.dots, t2 = J.getInterceptor$(frame), i = 0; i < 800; ++i) {
+      for (t1 = _this.dots, i = 0; i < 800; ++i) {
         if (i >= t1.length)
           return H.ioore(t1, i);
-        t3 = t1[i];
-        H.printString(t2.toString$0(frame));
-        t4 = t3.thetaStatus;
-        t5 = t4 === C.AxisIncDec_0;
-        if (t5)
-          ++t3.theta;
-        else if (t4 === C.AxisIncDec_1)
-          --t3.theta;
-        t6 = t3.theta;
-        if (t6 >= 6.283185307179586 && t5)
-          t4 = t3.thetaStatus = C.AxisIncDec_1;
-        if (t6 <= 0 && t4 === C.AxisIncDec_1)
-          t3.thetaStatus = C.AxisIncDec_0;
-        t4 = t3.globeRadius;
-        t3.x = t4 * Math.sin(t3.phi) * Math.cos(t3.theta);
-        t3.y = t4 * Math.cos(t3.phi);
-        t4 = t3.z = t4 * Math.sin(t3.phi) * Math.sin(t3.theta) + t4;
-        t3.thetaStatus = t3.thetaStatus === C.AxisIncDec_2 && t3.theta >= 3.141592653589793 ? C.AxisIncDec_1 : C.AxisIncDec_0;
-        t5 = t3.perspective;
-        if (typeof t5 !== "number")
-          return t5.$add();
-        t5 = t3.scaleProjected = t5 / (t5 + t4);
-        t6 = t3.x;
-        t7 = t3.projection_center_x;
-        if (typeof t7 !== "number")
-          return H.iae(t7);
-        t3.xProjected = t6 * t5 + t7;
-        t7 = t3.y;
-        t6 = t3.projection_center_y;
+        t2 = t1[i];
+        t2.animateTheta$1(frame);
+        t3 = t2.globeRadius;
+        t2.x = t3 * Math.sin(t2.phi) * Math.cos(t2.theta);
+        t2.y = t3 * Math.cos(t2.phi);
+        t3 = t2.z = t3 * Math.sin(t2.phi) * Math.sin(t2.theta) + t3;
+        t2.thetaStatus = t2.thetaStatus === C.AxisIncDec_2 && t2.theta >= 3.141592653589793 ? C.AxisIncDec_1 : C.AxisIncDec_0;
+        t4 = t2.perspective;
+        if (typeof t4 !== "number")
+          return t4.$add();
+        t4 = t2.scaleProjected = t4 / (t4 + t3);
+        t5 = t2.x;
+        t6 = t2.projection_center_x;
         if (typeof t6 !== "number")
           return H.iae(t6);
-        t3.yProjected = t7 * t5 + t6;
-        t6 = t3.canvasContext;
-        t5 = t3.canvasElement.width;
+        t2.xProjected = t5 * t4 + t6;
+        t6 = t2.y;
+        t5 = t2.projection_center_y;
         if (typeof t5 !== "number")
           return H.iae(t5);
-        t6.globalAlpha = Math.abs(1 - t4 / t5);
-        t6.beginPath();
-        t6.arc(t3.xProjected, t3.yProjected, 10 * t3.scaleProjected, 0, 6.283185307179586, false);
-        t6.fill();
+        t2.yProjected = t6 * t4 + t5;
+        t4 = t2.counterFrames;
+        t2.counterFrames = t4 === 2 ? 0 : t4 + 1;
+        t4 = t2.canvasContext;
+        t5 = t2.canvasElement.width;
+        if (typeof t5 !== "number")
+          return H.iae(t5);
+        t4.globalAlpha = Math.abs(1 - t3 / t5);
+        t4.beginPath();
+        t4.arc(t2.xProjected, t2.yProjected, 10 * t2.scaleProjected, 0, 6.283185307179586, false);
+        t4.fill();
       }
       t1 = window;
       t2 = type$.void_Function_num._as(_this.get$render());
